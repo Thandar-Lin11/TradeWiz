@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { IoSearchSharp } from "react-icons/io5";
-import useConversation from "../../zustand/useConversation";
+import { useConversation } from "../../zustand/useConversation";
 import useGetConversations from "../../hooks/useGetConversations";
 import toast from "react-hot-toast";
 
@@ -26,20 +25,14 @@ const SearchInput = () => {
     } else toast.error("No such user found!");
   };
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
+    <form onSubmit={handleSubmit} className="flex items-center">
       <input
         type="text"
         placeholder="Search…"
-        className="input input-bordered rounded-full"
+        className="input input-bordered rounded-lg w-full h-8 text-black"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <button
-        type="submit"
-        className="btn btn-circle bg-blue-300 hover:bg-blue-500 text-white"
-      >
-        <IoSearchSharp className="w-6 h-6 outline-none" />
-      </button>
     </form>
   );
 };

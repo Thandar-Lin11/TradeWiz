@@ -8,6 +8,13 @@ const channelSchema = new mongoose.Schema({
     required: true,
   },
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  messages: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ChannelMessage",
+      default: [],
+    },
+  ],
   isPrivate: { type: Boolean, default: false },
 });
 

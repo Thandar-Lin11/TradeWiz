@@ -7,8 +7,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000"],
+    origin: "*",
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
@@ -47,17 +48,53 @@ io.on("connection", (socket) => {
   });
 
   // Generate and broadcast forex price updates
-  const forexUpdateInterval = setInterval(() => {
-    const forexData = {
-      pair: "EUR/USD",
-      price: (Math.random() * (1.5 - 1.0) + 1.0).toFixed(4), // Random price between 1.0 and 1.5
-      timestamp: new Date(),
-    };
+  // Forex Data
+  function generateForexData() {
+    const pairs = ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD"];
+    return pairs.map((pair) => ({
+      pair,
+      bid: (Math.random() * (1.5 - 1.1) + 1.1).toFixed(4),
+      ask: (Math.random() * (1.5 - 1.1) + 1.1).toFixed(4),
+      timestamp: new Date().toISOString(),
+    }));
+  }
 
-    // Broadcast to Trading channel
-    io.to("Trading").emit("forexUpdate", forexData);
-    console.log("Forex update:", forexData);
-  }, 5000); // Every 5 seconds
+  // Gold Data
+  function generateGoldData() {
+    const pairs = ["XAU/USD", "XAG/USD"];
+    return pairs.map((pair) => ({
+      pair,
+      bid: (Math.random() * (2000 - 1800) + 1800).toFixed(2), // Example range for gold prices
+      ask: (Math.random() * (2000 - 1800) + 1800).toFixed(2),
+      timestamp: new Date().toISOString(),
+    }));
+  }
+
+  // Crypto Data
+  function generateCryptoData() {
+    const pairs = ["BTC/USD", "ETH/USD", "XRP/USD"];
+    return pairs.map((pair) => ({
+      pair,
+      bid: (Math.random() * (60000 - 30000) + 30000).toFixed(2), // Example range for BTC
+      ask: (Math.random() * (60000 - 30000) + 30000).toFixed(2),
+      timestamp: new Date().toISOString(),
+    }));
+  }
+
+  // Emit updates for each channel
+  setInterval(() => {
+    const forexData = generateForexData();
+
+    io.to("Currency").emit("forexUpdate", forexData);
+
+    const goldData = generateGoldData();
+
+    io.to("Gold").emit("forexUpdate", goldData);
+
+    const cryptoData = generateCryptoData();
+
+    io.to("Crypto").emit("forexUpdate", cryptoData);
+  }, 5000); // Update every 5 seconds
 
   const userId = socket.handshake.query.userId;
   if (userId != "undefined") userSocketMap[userId] = socket.id;
@@ -68,7 +105,9 @@ io.on("connection", (socket) => {
   // socket.on() is used to listen to the events. can be used both on client and server side
   socket.on("disconnect", () => {
     console.log("A user disconnected", socket.id);
-    clearInterval(forexUpdateInterval);
+    clearInterval(generateForexData);
+    clearInterval(generateGoldData);
+    clearInterval(generateCryptoData);
     delete userSocketMap[userId];
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });

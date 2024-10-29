@@ -5,12 +5,13 @@ import Channel from "../models/channel.model.js";
 // Create a new channel (Admin only)
 export const createChannel = async (req, res) => {
   try {
-    const { name, isPrivate } = req.body;
-
+    const userId = req.params.userId;
+    const { name } = req.body;
+    console.log("name: " + name);
+    console.log(userId);
     const newChannel = new Channel({
       name,
-      created_by: req.user._id,
-      isPrivate,
+      created_by: userId,
     });
 
     await newChannel.save();
